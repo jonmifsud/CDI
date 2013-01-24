@@ -46,6 +46,13 @@
 			
 			// We've come far enough... let's try to save it to disk!
 			if(CdiUtil::isCdiMaster()) {
+				//take care of storing the IDS in the log file when saving
+				if (preg_match('/^insert/i', $query)) {
+					$insertID = Symphony::Database()->getInsertID();
+					$query = str_replace('` (', '` (`id`,' ,$query);
+					$query = str_replace('VALUES (', " VALUES ('{$insertID}'," ,$query);
+					// var_dump($query);var_dump($insertID);die;
+				}
 				return CdiMaster::persistQuery($query);
 			} else if(CdiUtil::isCdiDBSyncMaster()) {
 				return CdiDBSync::persistQuery($query);
@@ -93,7 +100,7 @@
 			if(file_exists(CDI_FILE)) {
 				$contents = file_get_contents(CDI_FILE);
 				$entries = json_decode($contents, true);
-				sort($entries);
+				// sort($entries); //disabled to keep the ids with timestamps
 			}
 			return $entries;
 		}
