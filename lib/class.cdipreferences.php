@@ -114,6 +114,7 @@
 			if(CdiUtil::isCdiMaster()) {
 				$header->appendChild(self::appendInstanceMode());
 				$header->appendChild(self::appendCdiMasterQueries());
+				$header->appendChild(self::appendApiKey());
 				
 				if(file_exists(CDI_FILE) && CdiUtil::hasRequiredDumpDBVersion()) {
 					$leftColumn->appendChild(self::appendDownloadLog());
