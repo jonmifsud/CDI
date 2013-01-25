@@ -18,7 +18,7 @@
 		public static function uninstall() {
 			if(file_exists(CDI_FILE)) { unlink(CDI_FILE); }
 		}
-		
+
 		/**
 		 * Pretty-print JSON string
 		 *
@@ -123,6 +123,9 @@
 					$entries = CdiLogQuery::getCdiLogEntries();
 					$entries[$id] = array(0 => $ts, 1 => self::$lastEntryOrder, 2 => $hash, 3 => $query);
 					file_put_contents(CDI_FILE, CdiMaster::json_pretty(json_encode($entries)) );
+					//store a copy of the query in database so we don't run it again when we try to sync :)
+					Symphony::Database()->query("INSERT INTO `tbl_cdi_log` (`query_hash`,`author`,`url`,`date`,`order`)
+													VALUES ('" . $hash . "','" . CdiUtil::getAuthor() . "','" . CdiUtil::getURL() . "','" . $date . "'," . self::$lastEntryOrder . ")");
 					return true;
 				} catch(Exception $e) {
 					//TODO: think of some smart way of dealing with errors, perhaps through the preference screen or a CDI Status content page?
