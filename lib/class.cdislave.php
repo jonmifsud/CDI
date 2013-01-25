@@ -26,7 +26,7 @@
 		}
 		
 		public static function uninstall() {
-			Symphony::Database()->query("DROP TABLE IF EXISTS `tbl_cdi_log`");
+			// Symphony::Database()->query("DROP TABLE IF EXISTS `tbl_cdi_log`");
 			if(file_exists(CDI_FILE)) { unlink(CDI_FILE); }
 		}
 		
@@ -38,7 +38,7 @@
 		public static function update() {
 			// We should not be processing any queries when the extension is disabled or when we are the Master instance
 			// Check also exists on content page, but just to be sure!
-			if((!class_exists('Administration')) || !CdiUtil::isEnabled() || !CdiUtil::isCdiSlave()) {
+			if((!class_exists('Administration')) || !CdiUtil::isEnabled() /*|| !CdiUtil::isCdiSlave()*/) {
 				echo "WARNING: CDI is disabled or you are running the queryies on the Master instance. No queries have been executed.";
 				return;
 			}
