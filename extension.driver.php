@@ -56,6 +56,11 @@
 					'callback'	=> 'NavigationPreRender'
 				),
 				array(
+					'page'		=> '/backend/',
+					'delegate'	=> 'AdminPagePostGenerate',
+					'callback'	=> 'adminPagePostGenerate'
+				),
+				array(
 					'page' => '/system/preferences/',
 					'delegate' => 'AddCustomPreferenceFieldsets',
 					'callback' => 'appendPreferences'
@@ -97,6 +102,15 @@
 		public function NavigationPreRender($context) {
 			if(CdiUtil::hasDisabledBlueprints()) {
 				unset($context["navigation"][BLUEPRINTS_INDEX]);
+			}
+		}
+		
+		/**
+		 * If there are pending queries to be inserted this will insert them into the cdi_log table so they are not executed when the update script is run again
+		 */
+		public function adminPagePostGenerate(){
+			if(CdiUtil::isCdiMaster()) {
+				CdiMaster::persistQueries();
 			}
 		}
 

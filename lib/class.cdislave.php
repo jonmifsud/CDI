@@ -27,7 +27,7 @@
 		
 		public static function uninstall() {
 			// Symphony::Database()->query("DROP TABLE IF EXISTS `tbl_cdi_log`");
-			if(file_exists(CDI_FILE)) { unlink(CDI_FILE); }
+			// if(file_exists(CDI_FILE)) { unlink(CDI_FILE); }
 		}
 		
 		/**

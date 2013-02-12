@@ -8,10 +8,11 @@
 		private static $lastEntryTS;
 		private static $lastEntryOrder;
 		private static $meta_written = FALSE;
+		private static $pendingInserts = array() ;
 		
 		public static function install() {
 			self::uninstall();
-			Symphony::Database()->query("DROP TABLE IF EXISTS `tbl_cdi_log`");
+			// Symphony::Database()->query("DROP TABLE IF EXISTS `tbl_cdi_log`");
 			if (!file_exists(CDIROOT)) { mkdir(CDIROOT); }
 		}
 		
@@ -29,7 +30,7 @@
 		 * @param array $options Encoding options
 		 * @return string
 		 */
-		function json_pretty($json, $options = array())
+		private static function json_pretty($json, $options = array())
 		{
 		    $tokens = preg_split('|([\{\}\]\[,])|', $json, -1, PREG_SPLIT_DELIM_CAPTURE);
 		    $result = '';
@@ -95,6 +96,20 @@
 		    return $result;
 		}
 		
+
+		/**
+		 * If there are pending queries to be inserted this will insert them into the cdi_log table so they are not executed twice
+		 */
+		public static function persistQueries() {
+			if (count($pendingInserts) == 0) return true;
+			try{
+				return Symphony::Database()->insert($pendingInserts,'tbl_cdi_log');
+			} catch(Exception $e) {
+				//TODO: think of some smart way of dealing with errors, perhaps through the preference screen or a CDI Status content page?
+				return false;
+			}
+		}
+
 		/**
 		 * If it is proven to be a valid SQL Statement worthy of logging, the persistQuery() function will
 		 * write the statement to file and log it
@@ -124,8 +139,16 @@
 					$entries[$id] = array(0 => $ts, 1 => self::$lastEntryOrder, 2 => $hash, 3 => $query);
 					file_put_contents(CDI_FILE, CdiMaster::json_pretty(json_encode($entries)) );
 					//store a copy of the query in database so we don't run it again when we try to sync :)
-					Symphony::Database()->query("INSERT INTO `tbl_cdi_log` (`query_hash`,`author`,`url`,`date`,`order`)
-													VALUES ('" . $hash . "','" . CdiUtil::getAuthor() . "','" . CdiUtil::getURL() . "','" . $date . "'," . self::$lastEntryOrder . ")");
+					//since direct insertion fucks up we should store these in an Array and 'Save' them once on page complete
+					$pendingInserts[] = array(
+						"query_hash" => $hash,
+						"author" => CdiUtil::getAuthor(),
+						"url" =>  CdiUtil::getURL(),
+						"date" => $date,
+						"order" => self::$lastEntryOrder
+					);
+					// Symphony::Database()->query("INSERT INTO `tbl_cdi_log` (`query_hash`,`author`,`url`,`date`,`order`)
+					// 								VALUES ('" . $hash . "','" . CdiUtil::getAuthor() . "','" . CdiUtil::getURL() . "','" . $date . "'," . self::$lastEntryOrder . ")");
 					return true;
 				} catch(Exception $e) {
 					//TODO: think of some smart way of dealing with errors, perhaps through the preference screen or a CDI Status content page?
