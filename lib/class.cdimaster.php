@@ -101,9 +101,9 @@
 		 * If there are pending queries to be inserted this will insert them into the cdi_log table so they are not executed twice
 		 */
 		public static function persistQueries() {
-			if (count($pendingInserts) == 0) return true;
+			if (count(self::$pendingInserts) == 0) return true;
 			try{
-				return Symphony::Database()->insert($pendingInserts,'tbl_cdi_log');
+				return Symphony::Database()->insert(self::$pendingInserts,'tbl_cdi_log');
 			} catch(Exception $e) {
 				//TODO: think of some smart way of dealing with errors, perhaps through the preference screen or a CDI Status content page?
 				return false;
@@ -130,6 +130,7 @@
 				$hash = md5($id . $query);
 				$date = date('Y-m-d H:i:s', $ts);
 				
+			// var_dump('test');die;
 				try{
 					//We are only logging this to file because we do not execute CDI queries on the MASTER instance
 					//The database table `tbl_cdi_log` is removed from the database on the MASTER instance.
@@ -140,13 +141,14 @@
 					file_put_contents(CDI_FILE, CdiMaster::json_pretty(json_encode($entries)) );
 					//store a copy of the query in database so we don't run it again when we try to sync :)
 					//since direct insertion fucks up we should store these in an Array and 'Save' them once on page complete
-					$pendingInserts[] = array(
+					self::$pendingInserts[] = array(
 						"query_hash" => $hash,
 						"author" => CdiUtil::getAuthor(),
 						"url" =>  CdiUtil::getURL(),
 						"date" => $date,
 						"order" => self::$lastEntryOrder
 					);
+
 					// Symphony::Database()->query("INSERT INTO `tbl_cdi_log` (`query_hash`,`author`,`url`,`date`,`order`)
 					// 								VALUES ('" . $hash . "','" . CdiUtil::getAuthor() . "','" . CdiUtil::getURL() . "','" . $date . "'," . self::$lastEntryOrder . ")");
 					return true;
