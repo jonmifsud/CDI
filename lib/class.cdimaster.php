@@ -130,7 +130,7 @@
 				$hash = md5($id . $query);
 				$date = date('Y-m-d H:i:s', $ts);
 				
-			// var_dump('test');die;
+			// var_dump('test');//die;
 				try{
 					//We are only logging this to file because we do not execute CDI queries on the MASTER instance
 					//The database table `tbl_cdi_log` is removed from the database on the MASTER instance.

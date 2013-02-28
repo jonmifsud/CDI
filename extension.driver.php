@@ -58,7 +58,37 @@
 				array(
 					'page'		=> '/backend/',
 					'delegate'	=> 'AdminPagePostGenerate',
-					'callback'	=> 'adminPagePostGenerate'
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/pages/',
+					'delegate'	=> 'PagePostCreate',
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/pages/',
+					'delegate'	=> 'PagePostDelete',
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/pages/',
+					'delegate'	=> 'PagePostEdit',
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/sections/',
+					'delegate'	=> 'SectionPostCreate',
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/sections/',
+					'delegate'	=> 'SectionPostDelete',
+					'callback'	=> 'persistCdiQueries'
+				),
+				array(
+					'page'		=> '/blueprints/sections/',
+					'delegate'	=> 'SectionPostEdit',
+					'callback'	=> 'persistCdiQueries'
 				),
 				array(
 					'page' => '/system/preferences/',
@@ -108,7 +138,7 @@
 		/**
 		 * If there are pending queries to be inserted this will insert them into the cdi_log table so they are not executed when the update script is run again
 		 */
-		public function adminPagePostGenerate(){
+		public function persistCdiQueries(){
 			if(CdiUtil::isCdiMaster()) {
 				CdiMaster::persistQueries();
 			}
